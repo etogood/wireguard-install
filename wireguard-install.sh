@@ -104,7 +104,6 @@ TUN needs to be enabled before running this installer."
 fi
 
 new_client_dns () {
-	echo "OS: $os"
 	echo "Select a DNS server for the client:"
 	echo "   1) Current system resolvers"
 	echo "   2) Google"
@@ -151,7 +150,6 @@ new_client_dns () {
 new_client_setup () {
 	# Given a list of the assigned internal IPv4 addresses, obtain the lowest still
 	# available octet. Important to start looking at 2, because 1 is our gateway.
-	
 	octet=2
 	while grep AllowedIPs /etc/wireguard/wg0.conf | cut -d "." -f 4 | cut -d "/" -f 1 | grep -q "$octet"; do
 		(( octet++ ))
@@ -284,23 +282,21 @@ if [[ ! -e /etc/wireguard/wg0.conf ]]; then
 	echo
 	echo "WireGuard installation is ready to begin."
 	# Install a firewall if firewalld or iptables are not already available
-	if [[ "$os" == "alpine"]]; then
+	if [[ "$os" == "alpine" ]]; then
 		if ! rc-service -e awall && ! hash iptables 2>/dev/null; then
 			firewall="awall" 
 			# Good FW to use on Alpine
 			echo "awall, which is required to manage routing tables, will also be installed."
 		fi
-	else
-		if ! systemctl is-active --quiet firewalld.service && ! hash iptables 2>/dev/null; then
-			if [[ "$os" == "centos" || "$os" == "fedora" ]]; then
-				firewall="firewalld"
-				# We don't want to silently enable firewalld, so we give a subtle warning
-				# If the user continues, firewalld will be installed and enabled during setup
-				echo "firewalld, which is required to manage routing tables, will also be installed."
-			elif [[ "$os" == "debian" || "$os" == "ubuntu" ]]; then
-				# iptables is way less invasive than firewalld so no warning is given
-				firewall="iptables"
-			fi
+	elif ! systemctl is-active --quiet firewalld.service && ! hash iptables 2>/dev/null; then
+		if [[ "$os" == "centos" || "$os" == "fedora" ]]; then
+			firewall="firewalld"
+			# We don't want to silently enable firewalld, so we give a subtle warning
+			# If the user continues, firewalld will be installed and enabled during setup
+			echo "firewalld, which is required to manage routing tables, will also be installed."
+		elif [[ "$os" == "debian" || "$os" == "ubuntu" ]]; then
+			# iptables is way less invasive than firewalld so no warning is given
+			firewall="iptables"
 		fi
 	fi
 	read -n1 -r -p "Press any key to continue..."
