@@ -296,6 +296,7 @@ if [[ ! -e /etc/wireguard/wg0.conf ]]; then
 				firewall="iptables"
 			fi
 		fi
+	fi
 	read -n1 -r -p "Press any key to continue..."
 	# Install WireGuard
 	# If not running inside a container, set up the WireGuard kernel module
