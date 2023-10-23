@@ -163,7 +163,7 @@ new_client_setup () {
 	cat << EOF >> /etc/wireguard/wg0.conf
 # BEGIN_PEER $client
 [Peer]
-PublicKey = $(wg pubkey <<< $key)
+PublicKey = $(wg pubkey << $key)
 PresharedKey = $psk
 AllowedIPs = 10.7.0.$octet/32$(grep -q 'fddd:2c4:2c4:2c4::1' /etc/wireguard/wg0.conf && echo ", fddd:2c4:2c4:2c4::$octet/128")
 # END_PEER $client
