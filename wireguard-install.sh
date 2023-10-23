@@ -359,7 +359,7 @@ if [[ ! -e /etc/wireguard/wg0.conf ]]; then
 			apk update
 			apk add qrencode ca-certificates $cron $firewall
 			apk add wireguard-tools --no-install-recommends
-		if [[ "$os" == "ubuntu" ]]; then
+		elif [[ "$os" == "ubuntu" ]]; then
 			# Ubuntu
 			apt-get update
 			apt-get install -y qrencode ca-certificates $cron $firewall
