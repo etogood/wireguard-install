@@ -31,6 +31,7 @@ elif [[ -e /etc/debian_version ]]; then
 elif [[ -e /etc/alpine-release ]]; then
 	os="alpine"
 	os_version=$(grep -oE '[0-9]+' /etc/alpine-release | head -1)
+	echo $os
 elif [[ -e /etc/almalinux-release || -e /etc/rocky-release || -e /etc/centos-release ]]; then
 	os="centos"
 	os_version=$(grep -shoE '[0-9]+' /etc/almalinux-release /etc/rocky-release /etc/centos-release | head -1)
@@ -39,7 +40,7 @@ elif [[ -e /etc/fedora-release ]]; then
 	os_version=$(grep -oE '[0-9]+' /etc/fedora-release | head -1)
 else
 	echo "This installer seems to be running on an unsupported distribution.
-Supported distros are Ubuntu, Debian, AlmaLinux, Rocky Linux, CentOS and Fedora."
+Supported distros are Ubuntu, Debian, AlmaLinux, Rocky Linux, CentOS, Alpine and Fedora."
 	exit
 fi
 
