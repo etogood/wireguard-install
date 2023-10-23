@@ -104,6 +104,7 @@ TUN needs to be enabled before running this installer."
 fi
 
 new_client_dns () {
+	echo "OS: $os"
 	echo "Select a DNS server for the client:"
 	echo "   1) Current system resolvers"
 	echo "   2) Google"
@@ -150,7 +151,7 @@ new_client_dns () {
 new_client_setup () {
 	# Given a list of the assigned internal IPv4 addresses, obtain the lowest still
 	# available octet. Important to start looking at 2, because 1 is our gateway.
-	echo "OS: $os"
+	
 	octet=2
 	while grep AllowedIPs /etc/wireguard/wg0.conf | cut -d "." -f 4 | cut -d "/" -f 1 | grep -q "$octet"; do
 		(( octet++ ))
