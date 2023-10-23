@@ -306,7 +306,7 @@ if [[ ! -e /etc/wireguard/wg0.conf ]]; then
 		if [[ ! "$os" == "alpine" ]]; then
 			apk update 
 			apk add ip6tables iptables
-			apk add -u $firewall
+			apk add -u wireguard qrencode $firewall
 		elif [[ "$os" == "ubuntu" ]]; then
 			# Ubuntu
 			apt-get update
