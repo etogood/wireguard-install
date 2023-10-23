@@ -271,7 +271,7 @@ if [[ ! -e /etc/wireguard/wg0.conf ]]; then
 		if [[ "$boringtun_updates" =~ ^[yY]$ ]]; then
 			if [[ "$os" == "centos" || "$os" == "fedora" ]]; then
 				cron="cronie"
-			elif [[ "$os" == "debian" || "$os" == "ubuntu" ]]; then
+			elif [[ "$os" == "alpine" || "$os" == "debian" || "$os" == "ubuntu" ]]; then
 				cron="cron"
 			fi
 		fi
@@ -279,21 +279,31 @@ if [[ ! -e /etc/wireguard/wg0.conf ]]; then
 	echo
 	echo "WireGuard installation is ready to begin."
 	# Install a firewall if firewalld or iptables are not already available
-	if ! systemctl is-active --quiet firewalld.service && ! hash iptables 2>/dev/null; then
-		if [[ "$os" == "centos" || "$os" == "fedora" ]]; then
-			firewall="firewalld"
-			# We don't want to silently enable firewalld, so we give a subtle warning
-			# If the user continues, firewalld will be installed and enabled during setup
-			echo "firewalld, which is required to manage routing tables, will also be installed."
-		elif [[ "$os" == "debian" || "$os" == "ubuntu" ]]; then
-			# iptables is way less invasive than firewalld so no warning is given
-			firewall="iptables"
+	if [[ "$os" == "alpine"]]; then
+		if ! rc-service -e awall && ! hash iptables 2>/dev/null; then
+			firewall="awall" 
+			# Good FW to use on Alpine
+			echo "awall, which is required to manage routing tables, will also be installed."
+	else
+		if ! systemctl is-active --quiet firewalld.service && ! hash iptables 2>/dev/null; then
+			if [[ "$os" == "centos" || "$os" == "fedora" ]]; then
+				firewall="firewalld"
+				# We don't want to silently enable firewalld, so we give a subtle warning
+				# If the user continues, firewalld will be installed and enabled during setup
+				echo "firewalld, which is required to manage routing tables, will also be installed."
+			elif [[ "$os" == "debian" || "$os" == "ubuntu" ]]; then
+				# iptables is way less invasive than firewalld so no warning is given
+				firewall="iptables"
+			fi
 		fi
-	fi
 	read -n1 -r -p "Press any key to continue..."
 	# Install WireGuard
 	# If not running inside a container, set up the WireGuard kernel module
 	if [[ ! "$is_container" -eq 0 ]]; then
+		if [[ ! "$os" == "alpine" ]]; then
+			apk update 
+			apk add ip6tables iptables
+			apk add -u $firewall
 		if [[ "$os" == "ubuntu" ]]; then
 			# Ubuntu
 			apt-get update
@@ -343,6 +353,11 @@ if [[ ! -e /etc/wireguard/wg0.conf ]]; then
 	# Else, we are inside a container and BoringTun needs to be used
 	else
 		# Install required packages
+		if [[ "$os" == "alpine" ]]; then
+			# Ubuntu
+			apk update
+			apk add qrencode ca-certificates $cron $firewall
+			apk add wireguard-tools --no-install-recommends
 		if [[ "$os" == "ubuntu" ]]; then
 			# Ubuntu
 			apt-get update
