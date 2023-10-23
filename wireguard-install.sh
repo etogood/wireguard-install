@@ -43,7 +43,7 @@ Supported distros are Ubuntu, Debian, AlmaLinux, Rocky Linux, CentOS, Alpine and
 	exit
 fi
 
-echo $os
+echo "$os"
 
 if [[ "$os" == "ubuntu" && "$os_version" -lt 1804 ]]; then
 	echo "Ubuntu 18.04 or higher is required to use this installer.
