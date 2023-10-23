@@ -28,9 +28,9 @@ if grep -qs "ubuntu" /etc/os-release; then
 elif [[ -e /etc/debian_version ]]; then
 	os="debian"
 	os_version=$(grep -oE '[0-9]+' /etc/debian_version | head -1)
-elif [[ -e /etc/alpine_release ]]; then
+elif [[ -e /etc/alpine-release ]]; then
 	os="alpine"
-	os_version=$(grep -oE '[0-9]+' /etc/alpine_release | head -1)
+	os_version=$(grep -oE '[0-9]+' /etc/alpine-release | head -1)
 elif [[ -e /etc/almalinux-release || -e /etc/rocky-release || -e /etc/centos-release ]]; then
 	os="centos"
 	os_version=$(grep -shoE '[0-9]+' /etc/almalinux-release /etc/rocky-release /etc/centos-release | head -1)
@@ -68,10 +68,10 @@ This version of CentOS is too old and unsupported."
 fi
 
 # Detect environments where $PATH does not include the sbin directories
-if ! grep -q sbin <<< "$PATH"; then
-	echo '$PATH does not include sbin. Try using "su -" instead of "su".'
-	exit
-fi
+# if ! grep -q sbin <<< "$PATH"; then
+# 	echo '$PATH does not include sbin. Try using "su -" instead of "su".'
+# 	exit
+# fi
 
 systemd-detect-virt -cq
 is_container="$?"
