@@ -31,7 +31,6 @@ elif [[ -e /etc/debian_version ]]; then
 elif [[ -e /etc/alpine-release ]]; then
 	os="alpine"
 	os_version=$(grep -oE '[0-9]+' /etc/alpine-release | head -1)
-	echo $os
 elif [[ -e /etc/almalinux-release || -e /etc/rocky-release || -e /etc/centos-release ]]; then
 	os="centos"
 	os_version=$(grep -shoE '[0-9]+' /etc/almalinux-release /etc/rocky-release /etc/centos-release | head -1)
@@ -43,6 +42,8 @@ else
 Supported distros are Ubuntu, Debian, AlmaLinux, Rocky Linux, CentOS, Alpine and Fedora."
 	exit
 fi
+
+echo $os
 
 if [[ "$os" == "ubuntu" && "$os_version" -lt 1804 ]]; then
 	echo "Ubuntu 18.04 or higher is required to use this installer.
