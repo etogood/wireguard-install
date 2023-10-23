@@ -43,7 +43,7 @@ Supported distros are Ubuntu, Debian, AlmaLinux, Rocky Linux, CentOS, Alpine and
 	exit
 fi
 
-echo "OS: $os"
+
 
 if [[ "$os" == "ubuntu" && "$os_version" -lt 1804 ]]; then
 	echo "Ubuntu 18.04 or higher is required to use this installer.
@@ -150,6 +150,7 @@ new_client_dns () {
 new_client_setup () {
 	# Given a list of the assigned internal IPv4 addresses, obtain the lowest still
 	# available octet. Important to start looking at 2, because 1 is our gateway.
+	echo "OS: $os"
 	octet=2
 	while grep AllowedIPs /etc/wireguard/wg0.conf | cut -d "." -f 4 | cut -d "/" -f 1 | grep -q "$octet"; do
 		(( octet++ ))
