@@ -306,7 +306,7 @@ if [[ ! -e /etc/wireguard/wg0.conf ]]; then
 		if [[ ! "$os" == "alpine" ]]; then
 			apk update 
 			apk add ip6tables iptables
-			apk add -u wireguard qrencode $firewall
+			apk add -u wireguard-tools-wg libqrencode $firewall #TODO: libqrencode. Seems like it desn't exist
 		elif [[ "$os" == "ubuntu" ]]; then
 			# Ubuntu
 			apt-get update
