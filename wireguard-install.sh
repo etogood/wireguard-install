@@ -192,6 +192,7 @@ if [[ ! -e /etc/wireguard/wg0.conf ]]; then
 		apt-get update
 		apt-get install -y wget
 	fi
+	
 	clear
 	echo 'Welcome to this WireGuard road warrior installer!'
 	# If system has a single IPv4, it is selected automatically. Else, ask the user
@@ -284,6 +285,7 @@ if [[ ! -e /etc/wireguard/wg0.conf ]]; then
 			firewall="awall" 
 			# Good FW to use on Alpine
 			echo "awall, which is required to manage routing tables, will also be installed."
+		fi
 	else
 		if ! systemctl is-active --quiet firewalld.service && ! hash iptables 2>/dev/null; then
 			if [[ "$os" == "centos" || "$os" == "fedora" ]]; then
