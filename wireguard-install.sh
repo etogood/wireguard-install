@@ -494,6 +494,7 @@ EOF
 }
 EOF
 	awall list
+	awall enable cloud-server
 	awall enable wireguard
 	awall enable vpntraffic
 	awall activate
