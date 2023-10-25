@@ -308,8 +308,7 @@ if [[ ! -e /etc/wireguard/wg0.conf ]]; then
 			echo "http://dl-cdn.alpinelinux.org/alpine/v3.11/community" >> /etc/apk/repositories
 			apk update
 			apk add ip6tables iptables
-			apk add -u wireguard-tools wireguard-virt libqrencode $firewall
-			apk add -u wireguard-tools wireguard-lts libqrencode $firewall
+			apk add -u wireguard-tools wireguard libqrencode $firewall
 		elif [[ "$os" == "ubuntu" ]]; then
 			# Ubuntu
 			apt-get update
