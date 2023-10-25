@@ -512,41 +512,44 @@ EOF
     ]
 }
 EOF
+	
+		## VERIFY that port opened ##
+		iptables -S | grep "$port"
+		ip6tables -S | grep "$port"
+		sed -i "s/\(IPFORWARD *= *\).*/\1\"yes\"/" /etc/conf.d/iptables
+		rc-service iptables restart
+		rc-service ip6tables restart
+
+		if [[ $(sysctl net.ipv4.ip_forward) == "net.ipv4.ip_forward = 1" ]]; then
+			echo "Alpine Linux is now acting as a router"
+		fi
+
+		# Enable and start WireGuard service
+
 		cat << EOF > /etc/network/interfaces
-# WireGuard interface with private IP #
-auto wg0
-iface wg0 inet static
-	address 10.7.0.0
-	netmask 255.255.255.0
-	pre-up ip link add dev wg0 type wireguard
-	pre-up wg setconf wg0 /etc/wireguard/wg0.conf
-	post-up ip route add 10.7.0.0/24 dev wg0
-	post-down ip link delete wg0	
+	# WireGuard interface with private IP #
+	auto wg0
+	iface wg0 inet static
+		address 10.7.0.0
+		netmask 255.255.255.0
+		pre-up ip link add dev wg0 type wireguard
+		pre-up wg setconf wg0 /etc/wireguard/wg0.conf
+		post-up ip route add 10.7.0.0/24 dev wg0
+		post-down ip link delete wg0	
 EOF
 
-	ip link add dev wg0 type wireguard
-	wg setconf wg0 /etc/wireguard/wg0.conf
-	ifconfig wg0 10.7.0.0 netmask 255.255.255.0
-	## [ FLUSH it to avoid RTNETLINK error for existing routing table ] ##
-	ip addr flush dev wg0
-	ip route add 10.7.0.0/24 dev wg0
-	ifconfig wg0 up
+		ip link add dev wg0 type wireguard
+		wg setconf wg0 /etc/wireguard/wg0.conf
+		ifconfig wg0 10.7.0.0 netmask 255.255.255.0
+		## [ FLUSH it to avoid RTNETLINK error for existing routing table ] ##
+		ip addr flush dev wg0
+		ip route add 10.7.0.0/24 dev wg0
+		ifconfig wg0 up
 
-	awall enable wireguard
-	awall enable vpntraffic
-	awall activate
-	awall list
-	
-	## VERIFY that port opened ##
-	iptables -S | grep "$port"
-	ip6tables -S | grep "$port"
-	sed -i "s/\(IPFORWARD *= *\).*/\1\"yes\"/" /etc/conf.d/iptables
-	rc-service iptables restart
-	rc-service ip6tables restart
-
-	if [[ $(sysctl net.ipv4.ip_forward) == "net.ipv4.ip_forward = 1" ]]; then
-		echo "Alpine Linux is now acting as a router"
-	fi
+		awall enable wireguard
+		awall enable vpntraffic
+		awall activate
+		awall list
 
 	elif systemctl is-active --quiet firewalld.service; then
 		# Using both permanent and not permanent rules to avoid a firewalld
