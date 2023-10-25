@@ -358,7 +358,7 @@ if [[ ! -e /etc/wireguard/wg0.conf ]]; then
 	else
 		# Install required packages
 		if [[ "$os" == "alpine" ]]; then
-			# Ubuntu
+			# Alpine
 			apk update
 			apk add ca-certificates $cron awall #libqrencode
 			apk add wireguard-tools --no-install-recommends
@@ -415,6 +415,13 @@ Environment=WG_SUDO=1" > /etc/systemd/system/wg-quick@wg0.service.d/boringtun.co
 	if [[ "$firewall" == "firewalld" ]]; then
 		systemctl enable --now firewalld.service
 	fi
+	# If awall was just installed, enable it
+	if [[ "$firewall" == "awall" ]]; then
+		modprobe ip_tables
+		modprobe iptable_nat
+		rc-update add iptables
+		rc-update add ip6tables
+	fi
 	# Generate wg0.conf
 	cat << EOF > /etc/wireguard/wg0.conf
 # Do not alter the commented lines
@@ -438,7 +445,87 @@ EOF
 		# Enable without waiting for a reboot or service restart
 		echo 1 > /proc/sys/net/ipv6/conf/all/forwarding
 	fi
-	if systemctl is-active --quiet firewalld.service; then
+	if [[ "$os" == "alpine" ]]; then
+		cat << EOF > /etc/awall/optional/cloud-server.json
+{
+  "description": "Default awall policy to protect Cloud server",
+  "import": "custom-services",
+  "variable": { "internet_if": "eth0"},
+  "zone": {
+    "internet": { "iface": "\$internet_if" },
+    "vpn": { "iface": "wg0" }
+  },
+  "policy": [
+    { "in": "internet", "action": "drop" },
+    { "in": "vpn", "out": "internet", "action": "accept" },
+    { "out": "vpn", "in": "internet", "action": "accept" },
+    { "action": "reject" }
+  ],
+  "snat": [ { "out": "internet", "src": "192.168.20.1/24" } ]
+}
+EOF
+
+	cat << EOF > /etc/awall/optional/wireguard.json
+{
+    "description": "Allow incoming WireGuard UDP port 31194",
+    "filter": [
+        {
+            "in": "internet",
+            "out": "_fw",
+            "service": "wireguard",
+            "action": "accept"
+        }
+    ]
+}
+EOF
+
+	cat << EOF > /etc/awall/optional/vpntraffic.json
+{
+    "description": "Allow VPN traffic for selected ports",
+    "filter": [
+        {
+            "in": "vpn",
+            "out": "_fw",
+            "service": [ "ssh", "dns", "squid", "ping" ],
+            "action": "accept",
+	    "src": "192.168.20.1/24"
+        }
+    ]
+}
+EOF
+	awall list
+	awall enable wireguard
+	awall enable vpntraffic
+	awall activate
+	## VERIFY that port opened ##
+	iptables -S | grep 31194
+	ip6tables -S | grep 31194
+	sed -c -i "s/\(IPFORWARD *= *\).*/\1\"yes\"/" /etc/conf.d/iptables
+	rc-service iptables restart
+	rc-service ip6tables restart
+
+	cat << EOF > /etc/network/interfaces
+# WireGuard interface with private IP #
+auto wg0
+iface wg0 inet static
+	address 192.168.20.1
+	netmask 255.255.255.0
+	pre-up ip link add dev wg0 type wireguard
+	pre-up wg setconf wg0 /etc/wireguard/wg0.conf
+	post-up ip route add 192.168.20.1/24 dev wg0
+	post-down ip link delete wg0	
+EOF
+
+	ip link add dev wg0 type wireguard
+	wg setconf wg0 /etc/wireguard/wg0.conf
+	ifconfig wg0 192.168.20.1 netmask 255.255.255.0
+	## [ FLUSH it to avoid RTNETLINK error for existing routing table ] ##
+	ip addr flush dev wg0
+	ip route add 192.168.20.1/24 dev wg0
+	ifconfig wg0 up
+
+	
+	elif systemctl is-active --quiet firewalld.service; then
 		# Using both permanent and not permanent rules to avoid a firewalld
 		# reload.
 		firewall-cmd --add-port="$port"/udp
