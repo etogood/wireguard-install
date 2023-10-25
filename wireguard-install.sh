@@ -469,22 +469,22 @@ EOF
 {
   "description": "Default awall policy to protect Cloud server",
   "import": "custom-services",
-  "variable": { "internet_if": "eth0"},
+  "variable": { "internet_if": "eth+"},
   "zone": {
-    "internet": { "iface": "\$internet_if" },
+    "WAN": { "iface": "\$internet_if" },
     "VPN": { "iface": "wg0" }
   },
   "policy": [
-    { "in": "internet", "action": "accept" },
-    { "in": "VPN", "out": "internet", "action": "accept" },
-    { "out": "VPN", "in": "internet", "action": "accept" },
+    { "in": "WAN", "action": "drop" },
+    { "in": "VPN", "out": "WAN", "action": "accept" },
+    { "out": "VPN", "in": "WAN", "action": "accept" },
     { "action": "reject" }
   ],
   "snat": [ { "out": "internet", "src": "10.7.0.0/24" } ]
 }
 EOF
 
-	cat << EOF > /etc/awall/optional/wireguard.json
+		cat << EOF > /etc/awall/optional/wireguard.json
 {
     "description": "Allow incoming WireGuard UDP port $port",
     "filter": [
@@ -498,22 +498,36 @@ EOF
 }
 EOF
 
-	cat << EOF > /etc/awall/optional/vpntraffic.json
+		cat << EOF > /etc/awall/optional/vpntraffic.json
 {
     "description": "Allow VPN traffic for selected ports",
     "filter": [
         {
             "in": "VPN",
             "out": "_fw",
-            "service": [ "ssh", "dns", "squid", "ping", "internet" ],
+            "service": [ "squid", "ping", "WAN" ],
             "action": "accept",
 	    "src": "10.7.0.0/24"
         }
     ]
 }
 EOF
+		cat << EOF > /etc/awall/optional/traffic.json
+{
+  "description": "Allow outbound dns, http/https, ssh, ntp, ssh and ping",
 
-	cat << EOF > /etc/network/interfaces
+  "filter": [
+    {
+      "in": "_fw",
+      "out": "WAN",
+      "service": ["dns", "http", "https", "ssh", "ntp", "ping"],
+      "action": "accept"
+    }
+  ]
+}
+EOF
+
+		cat << EOF > /etc/network/interfaces
 # WireGuard interface with private IP #
 auto wg0
 iface wg0 inet static
@@ -537,6 +551,7 @@ EOF
 	awall enable cloud-server
 	awall enable wireguard
 	awall enable vpntraffic
+	awall enable traffic
 	awall activate
 	## VERIFY that port opened ##
 	iptables -S | grep "$port"
