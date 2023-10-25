@@ -360,7 +360,7 @@ if [[ ! -e /etc/wireguard/wg0.conf ]]; then
 		if [[ "$os" == "alpine" ]]; then
 			# Ubuntu
 			apk update
-			apk add libqrencode ca-certificates $cron $firewall
+			apk add ca-certificates $cron $firewall #libqrencode
 			apk add wireguard-tools --no-install-recommends
 		elif [[ "$os" == "ubuntu" ]]; then
 			# Ubuntu
