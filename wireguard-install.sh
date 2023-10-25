@@ -307,14 +307,14 @@ if [[ ! -e /etc/wireguard/wg0.conf ]]; then
 			echo "ADDING NEW REPOS in /etc/apk/repositories"
 			{
 				echo "http://dl-cdn.alpinelinux.org/alpine/v3.11/community" 
-				echo "http://dl-cdn.alpinelinux.org/alpine/v3.18/community" 
-				echo "https://dl-cdn.alpinelinux.org/alpine/edge/community/" 
+				echo "http://dl-cdn.alpinelinux.org/alpine/v3.18/community"
 			} >> /etc/apk/repositories
 			apk update
 			apk add -u ip6tables iptables
 			apk add -u wireguard-tools awall libqrencode
 		elif [[ "$os" == "ubuntu" ]]; then
 			# Ubuntu
+
 			apt-get update
 			apt-get install -y wireguard qrencode $firewall
 		elif [[ "$os" == "debian" && "$os_version" -ge 11 ]]; then
