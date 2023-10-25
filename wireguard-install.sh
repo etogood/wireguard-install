@@ -186,6 +186,8 @@ PersistentKeepalive = 25
 EOF
 }
 
+cat /etc/wireguard/wg0.conf
+
 if [[ ! -e /etc/wireguard/wg0.conf ]]; then
 	# Detect some Debian minimal setups where neither wget nor curl are installed
 	if ! hash wget 2>/dev/null && ! hash curl 2>/dev/null; then
