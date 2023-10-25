@@ -312,7 +312,7 @@ if [[ ! -e /etc/wireguard/wg0.conf ]]; then
 			} >> /etc/apk/repositories
 			apk update
 			apk add -u ip6tables iptables
-			apk add -u wireguard-tools awall #libqrencode
+			apk add -u wireguard-tools awall libqrencode
 		elif [[ "$os" == "ubuntu" ]]; then
 			# Ubuntu
 			apt-get update
@@ -457,6 +457,28 @@ EOF
 	fi
 	if [[ "$os" == "alpine" ]]; then
 
+	# Enable and start WireGuard service
+
+		cat << EOF > /etc/network/interfaces
+	# WireGuard interface with private IP #
+	auto wg0
+	iface wg0 inet static
+		address 10.7.0.0
+		netmask 255.255.255.0
+		pre-up ip link add dev wg0 type wireguard
+		pre-up wg setconf wg0 /etc/wireguard/wg0.conf
+		post-up ip route add 10.7.0.0/24 dev wg0
+		post-down ip link delete wg0	
+EOF
+
+		ip link add dev wg0 type wireguard
+		wg setconf wg0 /etc/wireguard/wg0.conf
+		ifconfig wg0 10.7.0.0 netmask 255.255.255.0
+		## [ FLUSH it to avoid RTNETLINK error for existing routing table ] ##
+		ip addr flush dev wg0
+		ip route add 10.7.0.0/24 dev wg0
+		ifconfig wg0 up
+
 		cat << EOF > /etc/awall/private/custom-services.json
 {
     "service": {
@@ -529,28 +551,7 @@ EOF
 			echo "Alpine Linux is now acting as a router"
 		fi
 
-		# Enable and start WireGuard service
-
-		cat << EOF > /etc/network/interfaces
-	# WireGuard interface with private IP #
-	auto wg0
-	iface wg0 inet static
-		address 10.7.0.0
-		netmask 255.255.255.0
-		pre-up ip link add dev wg0 type wireguard
-		pre-up wg setconf wg0 /etc/wireguard/wg0.conf
-		post-up ip route add 10.7.0.0/24 dev wg0
-		post-down ip link delete wg0	
-EOF
-
-		ip link add dev wg0 type wireguard
-		wg setconf wg0 /etc/wireguard/wg0.conf
-		ifconfig wg0 10.7.0.0 netmask 255.255.255.0
-		## [ FLUSH it to avoid RTNETLINK error for existing routing table ] ##
-		ip addr flush dev wg0
-		ip route add 10.7.0.0/24 dev wg0
-		ifconfig wg0 up
-
+		awall enable cloud-server
 		awall enable wireguard
 		awall enable vpntraffic
 		awall activate
