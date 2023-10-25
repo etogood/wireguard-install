@@ -305,7 +305,8 @@ if [[ ! -e /etc/wireguard/wg0.conf ]]; then
 	if [[ ! "$is_container" -eq 0 ]]; then
 		if [[ "$os" == "alpine" ]]; then
 			# Alpine
-			apk update 
+			echo "http://dl-cdn.alpinelinux.org/alpine/v3.11/community" >> /etc/apk/repositories
+			apk update
 			apk add ip6tables iptables
 			apk add -u wireguard-tools wireguard-virt libqrencode $firewall
 			apk add -u wireguard-tools wireguard-lts libqrencode $firewall
