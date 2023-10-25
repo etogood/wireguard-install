@@ -472,12 +472,12 @@ EOF
   "variable": { "internet_if": "eth0"},
   "zone": {
     "internet": { "iface": "\$internet_if" },
-    "vpn": { "iface": "wg0" }
+    "VPN": { "iface": "wg0" }
   },
   "policy": [
     { "in": "internet", "action": "drop" },
-    { "in": "vpn", "out": "internet", "action": "accept" },
-    { "out": "vpn", "in": "internet", "action": "accept" },
+    { "in": "VPN", "out": "internet", "action": "accept" },
+    { "out": "VPN", "in": "internet", "action": "accept" },
     { "action": "reject" }
   ],
   "snat": [ { "out": "internet", "src": "10.7.0.0/24" } ]
@@ -503,7 +503,7 @@ EOF
     "description": "Allow VPN traffic for selected ports",
     "filter": [
         {
-            "in": "vpn",
+            "in": "VPN",
             "out": "_fw",
             "service": [ "ssh", "dns", "squid", "ping" ],
             "action": "accept",
