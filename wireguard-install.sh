@@ -500,7 +500,7 @@ EOF
 	## VERIFY that port opened ##
 	iptables -S | grep 31194
 	ip6tables -S | grep 31194
-	sed -c -i "s/\(IPFORWARD *= *\).*/\1\"yes\"/" /etc/conf.d/iptables
+	sed -i "s/\(IPFORWARD *= *\).*/\1\"yes\"/" /etc/conf.d/iptables
 	rc-service iptables restart
 	rc-service ip6tables restart
 
@@ -524,7 +524,7 @@ EOF
 	ip route add 192.168.20.1/24 dev wg0
 	ifconfig wg0 up
 
-	
+
 	elif systemctl is-active --quiet firewalld.service; then
 		# Using both permanent and not permanent rules to avoid a firewalld
 		# reload.
