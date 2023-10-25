@@ -218,7 +218,7 @@ if [[ ! -e /etc/wireguard/wg0.conf ]]; then
 		echo
 		echo "This server is behind NAT. What is the public IPv4 address or hostname?"
 		# Get public IP and sanitize with grep
-		get_public_ip=$(grep -m 1 -oE '^[0-9]{1,3}(\.[0-9]{1,3}){3}$' <<< "$(wget -T 10 -t 1 -4qO- "http://ip1.dynupdate.no-ip.com/" || curl -m 10 -4Ls "http://ip1.dynupdate.no-ip.com/")")
+		get_public_ip=$(grep -m 1 -oE '^[0-9]{1,3}(\.[0-9]{1,3}){3}$' <<< "$(wget -T 10 -t 1 -qO- "http://ip1.dynupdate.no-ip.com/" || curl -m 10 -4Ls "http://ip1.dynupdate.no-ip.com/")")
 		read -p "Public IPv4 address / hostname [$get_public_ip]: " public_ip
 		# If the checkip service is unavailable and user didn't provide input, ask again
 		until [[ -n "$get_public_ip" || -n "$public_ip" ]]; do
@@ -306,7 +306,7 @@ if [[ ! -e /etc/wireguard/wg0.conf ]]; then
 		if [[ ! "$os" == "alpine" ]]; then
 			apk update 
 			apk add ip6tables iptables
-			apk add -u wireguard-tools-wg libqrencode $firewall #TODO: libqrencode. Seems like it desn't exist
+			apk add -u wireguard-tools wireguard-virt $firewall #TODO: libqrencode. Seems like it desn't exist
 		elif [[ "$os" == "ubuntu" ]]; then
 			# Ubuntu
 			apt-get update
