@@ -511,6 +511,68 @@ EOF
 }
 EOF
 
+		cat << EOF > /etc/awall/optional/ssh.json
+{
+    "description": "Allow incoming SSH access (TCP/22)",
+
+    "filter": [
+        {
+            "in": "internet",
+            "out": "_fw",
+            "service": "ssh",
+            "action": "accept",
+            "src": "0.0.0.0/0",
+            "conn-limit": { "count": 3, "interval": 60 }
+        }
+    ]
+}
+EOF
+
+		cat << EOF > /etc/awall/optional/ping.json
+{
+
+    "description": "Allow ping-pong",
+
+    "filter": [
+        {
+              "in": "internet",
+              "service": "ping",
+              "action": "accept",
+              "flow-limit": { "count": 10, "interval": 6 }
+        }
+    ]
+}
+EOF
+
+		cat << EOF > /etc/awall/optional/webserver.json
+{
+    "description": "Allow incoming Apache (TCP 80 & 443) ports",
+    "filter": [
+        {
+            "in": "internet",
+            "out": "_fw",
+            "service": [ "http", "https"],
+            "action": "accept"
+        }
+    ]
+}
+EOF
+
+		cat << EOF > /etc/awall/optional/outgoing.json
+{
+    "description": "Allow outgoing connections for http/https, dns, ssh, ntp, ssh and ping",
+
+    "filter": [
+        {
+            "in": "_fw",
+            "out": "internet",
+            "service": [ "http", "https", "dns", "ssh", "ntp", "ping" ],
+            "action": "accept"
+        }
+    ]
+}
+EOF
+
 		cat << EOF > /etc/awall/optional/wireguard.json
 {
     "description": "Allow incoming WireGuard UDP port $port",
@@ -541,6 +603,10 @@ EOF
 EOF
 	
 		awall enable cloud-server
+		awall enable ssh
+		awall enable ping
+		awall enable webserver
+		awall enable outgoing
 		awall enable wireguard
 		awall enable vpntraffic
 		awall activate
