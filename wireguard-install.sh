@@ -416,7 +416,10 @@ Environment=WG_SUDO=1" > /etc/systemd/system/wg-quick@wg0.service.d/boringtun.co
 		systemctl enable --now firewalld.service
 	fi
 	# If awall was just installed, enable it
+	echo "FW = $firewall"
+
 	if [[ "$firewall" == "awall" ]]; then
+	echo "AWALL IN _____________________________________________________"
 		modprobe -v ip_tables # IPv4
 		modprobe -v ip6_tables # if IPv6 is used
 		modprobe -v iptable_nat # if NAT is used aka router
@@ -534,6 +537,7 @@ EOF
 	ifconfig wg0 up
 
 	awall list
+	awall enable cloud-server
 	awall enable wireguard
 	awall enable vpntraffic
 	awall activate
