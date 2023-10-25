@@ -446,6 +446,20 @@ EOF
 		echo 1 > /proc/sys/net/ipv6/conf/all/forwarding
 	fi
 	if [[ "$os" == "alpine" ]]; then
+
+		cat << EOF > /etc/awall/private/custom-services.json
+{
+    "service": {
+        "wireguard": [
+            { "proto": "udp", "port": 31194 }
+        ],
+        "squid": [
+            { "proto": "tcp", "port": 3128 }
+        ]
+    }
+}
+EOF
+
 		cat << EOF > /etc/awall/optional/cloud-server.json
 {
   "description": "Default awall policy to protect Cloud server",
@@ -494,7 +508,6 @@ EOF
 }
 EOF
 	awall list
-	awall enable cloud-server
 	awall enable wireguard
 	awall enable vpntraffic
 	awall activate
