@@ -306,7 +306,6 @@ if [[ ! -e /etc/wireguard/wg0.conf ]]; then
 			# Alpine
 			echo "ADDING NEW REPOS in /etc/apk/repositories"
 			{
-				echo "http://dl-cdn.alpinelinux.org/alpine/v3.11/community" 
 				echo "http://dl-cdn.alpinelinux.org/alpine/v3.18/community"
 			} >> /etc/apk/repositories
 			apk update
