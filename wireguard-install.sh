@@ -481,7 +481,7 @@ EOF
 
 	cat << EOF > /etc/awall/optional/wireguard.json
 {
-    "description": "Allow incoming WireGuard UDP port 31194",
+    "description": "Allow incoming WireGuard UDP port $port",
     "filter": [
         {
             "in": "internet",
