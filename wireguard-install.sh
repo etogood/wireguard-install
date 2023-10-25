@@ -521,8 +521,6 @@ EOF
 	awall list
 	awall enable cloud-server
 	awall enable wireguard
-	awall enable vpntraffic
-	awall enable traffic
 	awall activate
 	## VERIFY that port opened ##
 	iptables -S | grep "$port"
