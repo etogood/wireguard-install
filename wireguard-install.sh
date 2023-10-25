@@ -677,7 +677,9 @@ WantedBy=multi-user.target" >> /etc/systemd/system/wg-iptables.service
 	# Generates the custom client.conf
 	new_client_setup
 	# Enable and start the wg-quick service
-	systemctl enable --now wg-quick@wg0.service
+	if [[ ! "$os" == "alpine" ]]; then
+		systemctl enable --now wg-quick@wg0.service
+	fi
 	# Set up automatic updates for BoringTun if the user wanted to
 	if [[ "$boringtun_updates" =~ ^[yY]$ ]]; then
 		# Deploy upgrade script
@@ -852,7 +854,7 @@ else
 					if [[ "$os" == "alpine" ]]; then
 						# Alpine
 						rm -rf /etc/wireguard/
-						apk del --purge -y wireguard-tools
+						apk del --purge wireguard-tools
 					elif [[ "$os" == "ubuntu" ]]; then
 						# Ubuntu
 						rm -rf /etc/wireguard/
