@@ -424,9 +424,6 @@ Environment=WG_SUDO=1" > /etc/systemd/system/wg-quick@wg0.service.d/boringtun.co
 		modprobe -v ip6_tables # if IPv6 is used
 		modprobe -v iptable_nat # if NAT is used aka router
 
-		insmod /lib/modules/5.4.43-1-virt/kernel/net/netfilter/x_tables.ko 
-		insmod /lib/modules/5.4.43-1-virt/kernel/net/ipv4/netfilter/ip_tables.ko ip6_tables
-
 		rc-update add iptables
 		rc-update add ip6tables
 	fi
@@ -508,7 +505,7 @@ EOF
         {
             "in": "VPN",
             "out": "_fw",
-            "service": [ "ssh", "dns", "squid", "ping" ],
+            "service": [ "ssh", "dns", "squid", "ping", "internet" ],
             "action": "accept",
 	    "src": "10.7.0.0/24"
         }
