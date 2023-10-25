@@ -304,6 +304,7 @@ if [[ ! -e /etc/wireguard/wg0.conf ]]; then
 	if [[ ! "$is_container" -eq 0 ]]; then
 		if [[ "$os" == "alpine" ]]; then
 			# Alpine
+			echo "ADDING NEW REPOS in /etc/apk/repositories"
 			echo "http://dl-cdn.alpinelinux.org/alpine/v3.11/community" >> /etc/apk/repositories
 			apk update
 			apk add -u ip6tables iptables
