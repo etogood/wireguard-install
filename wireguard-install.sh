@@ -451,7 +451,7 @@ EOF
 {
     "service": {
         "wireguard": [
-            { "proto": "udp", "port": 31194 }
+            { "proto": "udp", "port": $port }
         ],
         "squid": [
             { "proto": "tcp", "port": 3128 }
@@ -512,8 +512,8 @@ EOF
 	awall enable vpntraffic
 	awall activate
 	## VERIFY that port opened ##
-	iptables -S | grep 31194
-	ip6tables -S | grep 31194
+	iptables -S | grep "$port"
+	ip6tables -S | grep "$port"
 	sed -i "s/\(IPFORWARD *= *\).*/\1\"yes\"/" /etc/conf.d/iptables
 	rc-service iptables restart
 	rc-service ip6tables restart
