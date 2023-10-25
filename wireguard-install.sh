@@ -480,7 +480,7 @@ EOF
     { "out": "VPN", "in": "WAN", "action": "accept" },
     { "action": "reject" }
   ],
-  "snat": [ { "out": "internet", "src": "$ip" } ]
+  "snat": [ { "out": "WAN", "src": "$ip" } ]
 }
 EOF
 
@@ -489,7 +489,7 @@ EOF
     "description": "Allow incoming WireGuard UDP port $port",
     "filter": [
         {
-            "in": "internet",
+            "in": "WAN",
             "out": "_fw",
             "service": "wireguard",
             "action": "accept"
