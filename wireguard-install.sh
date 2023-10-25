@@ -417,8 +417,13 @@ Environment=WG_SUDO=1" > /etc/systemd/system/wg-quick@wg0.service.d/boringtun.co
 	fi
 	# If awall was just installed, enable it
 	if [[ "$firewall" == "awall" ]]; then
-		modprobe ip_tables
-		modprobe iptable_nat
+		modprobe -v ip_tables # IPv4
+		modprobe -v ip6_tables # if IPv6 is used
+		modprobe -v iptable_nat # if NAT is used aka router
+
+		insmod /lib/modules/5.4.43-1-virt/kernel/net/netfilter/x_tables.ko 
+		insmod /lib/modules/5.4.43-1-virt/kernel/net/ipv4/netfilter/ip_tables.ko ip6_tables
+
 		rc-update add iptables
 		rc-update add ip6tables
 	fi
@@ -475,7 +480,7 @@ EOF
     { "out": "vpn", "in": "internet", "action": "accept" },
     { "action": "reject" }
   ],
-  "snat": [ { "out": "internet", "src": "192.168.20.1/24" } ]
+  "snat": [ { "out": "internet", "src": "10.7.0.0/24" } ]
 }
 EOF
 
@@ -502,7 +507,7 @@ EOF
             "out": "_fw",
             "service": [ "ssh", "dns", "squid", "ping" ],
             "action": "accept",
-	    "src": "192.168.20.1/24"
+	    "src": "10.7.0.0/24"
         }
     ]
 }
@@ -522,20 +527,20 @@ EOF
 # WireGuard interface with private IP #
 auto wg0
 iface wg0 inet static
-	address 192.168.20.1
+	address 10.7.0.0
 	netmask 255.255.255.0
 	pre-up ip link add dev wg0 type wireguard
 	pre-up wg setconf wg0 /etc/wireguard/wg0.conf
-	post-up ip route add 192.168.20.1/24 dev wg0
+	post-up ip route add 10.7.0.0/24 dev wg0
 	post-down ip link delete wg0	
 EOF
 
 	ip link add dev wg0 type wireguard
 	wg setconf wg0 /etc/wireguard/wg0.conf
-	ifconfig wg0 192.168.20.1 netmask 255.255.255.0
+	ifconfig wg0 10.7.0.0 netmask 255.255.255.0
 	## [ FLUSH it to avoid RTNETLINK error for existing routing table ] ##
 	ip addr flush dev wg0
-	ip route add 192.168.20.1/24 dev wg0
+	ip route add 10.7.0.0/24 dev wg0
 	ifconfig wg0 up
 
 
