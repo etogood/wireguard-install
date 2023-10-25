@@ -70,7 +70,7 @@ This version of CentOS is too old and unsupported."
 fi
 
 # Detect environments where $PATH does not include the sbin directories
-# if ! grep -q sbin << "$PATH"; then
+# if ! grep -q sbin <<< "$PATH"; then
 # 	echo '$PATH does not include sbin. Try using "su -" instead of "su".'
 # 	exit
 # fi
@@ -165,7 +165,7 @@ new_client_setup () {
 	cat << EOF >> /etc/wireguard/wg0.conf
 # BEGIN_PEER $client
 [Peer]
-PublicKey = $(wg pubkey << $key)
+PublicKey = $(wg pubkey <<< $key)
 PresharedKey = $psk
 AllowedIPs = 10.7.0.$octet/32$(grep -q 'fddd:2c4:2c4:2c4::1' /etc/wireguard/wg0.conf && echo ", fddd:2c4:2c4:2c4::$octet/128")
 # END_PEER $client
@@ -185,8 +185,6 @@ Endpoint = $(grep '^# ENDPOINT' /etc/wireguard/wg0.conf | cut -d " " -f 3):$(gre
 PersistentKeepalive = 25
 EOF
 }
-
-cat /etc/wireguard/wg0.conf
 
 if [[ ! -e /etc/wireguard/wg0.conf ]]; then
 	# Detect some Debian minimal setups where neither wget nor curl are installed
@@ -220,7 +218,7 @@ if [[ ! -e /etc/wireguard/wg0.conf ]]; then
 		echo
 		echo "This server is behind NAT. What is the public IPv4 address or hostname?"
 		# Get public IP and sanitize with grep
-		get_public_ip=$(grep -m 1 -oE '^[0-9]{1,3}(\.[0-9]{1,3}){3}$' << "$(wget -T 10 -t 1 -4qO- "http://ip1.dynupdate.no-ip.com/" || curl -m 10 -4Ls "http://ip1.dynupdate.no-ip.com/")")
+		get_public_ip=$(grep -m 1 -oE '^[0-9]{1,3}(\.[0-9]{1,3}){3}$' <<< "$(wget -T 10 -t 1 -4qO- "http://ip1.dynupdate.no-ip.com/" || curl -m 10 -4Ls "http://ip1.dynupdate.no-ip.com/")")
 		read -p "Public IPv4 address / hostname [$get_public_ip]: " public_ip
 		# If the checkip service is unavailable and user didn't provide input, ask again
 		until [[ -n "$get_public_ip" || -n "$public_ip" ]]; do
@@ -259,7 +257,7 @@ if [[ ! -e /etc/wireguard/wg0.conf ]]; then
 	echo "Enter a name for the first client:"
 	read -p "Name [client]: " unsanitized_client
 	# Allow a limited lenght and set of characters to avoid conflicts
-	client=$(sed 's/[^0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-]/_/g' << "$unsanitized_client" | cut -c-15)
+	client=$(sed 's/[^0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-]/_/g' <<< "$unsanitized_client" | cut -c-15)
 	[[ -z "$client" ]] && client="client"
 	echo
 	new_client_dns
@@ -501,7 +499,7 @@ WantedBy=multi-user.target" >> /etc/systemd/system/wg-iptables.service
 #!/bin/bash
 latest=$(wget -qO- https://wg.nyr.be/1/latest 2>/dev/null || curl -sL https://wg.nyr.be/1/latest 2>/dev/null)
 # If server did not provide an appropriate response, exit
-if ! head -1 << "$latest" | grep -qiE "^boringtun.+[0-9]+\.[0-9]+.*$"; then
+if ! head -1 <<< "$latest" | grep -qiE "^boringtun.+[0-9]+\.[0-9]+.*$"; then
 	echo "Update server unavailable"
 	exit
 fi
@@ -570,11 +568,11 @@ else
 			echo "Provide a name for the client:"
 			read -p "Name: " unsanitized_client
 			# Allow a limited lenght and set of characters to avoid conflicts
-			client=$(sed 's/[^0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-]/_/g' << "$unsanitized_client" | cut -c-15)
+			client=$(sed 's/[^0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-]/_/g' <<< "$unsanitized_client" | cut -c-15)
 			while [[ -z "$client" ]] || grep -q "^# BEGIN_PEER $client$" /etc/wireguard/wg0.conf; do
 				echo "$client: invalid name."
 				read -p "Name: " unsanitized_client
-				client=$(sed 's/[^0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-]/_/g' << "$unsanitized_client" | cut -c-15)
+				client=$(sed 's/[^0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-]/_/g' <<< "$unsanitized_client" | cut -c-15)
 			done
 			echo
 			new_client_dns
