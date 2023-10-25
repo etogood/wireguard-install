@@ -307,7 +307,7 @@ if [[ ! -e /etc/wireguard/wg0.conf ]]; then
 			echo "http://dl-cdn.alpinelinux.org/alpine/v3.11/community" >> /etc/apk/repositories
 			apk update
 			apk add -u ip6tables iptables
-			apk add -u wireguard-tools awall #libqrencode
+			apk add -u wireguard-tools awall libqrencode
 		elif [[ "$os" == "ubuntu" ]]; then
 			# Ubuntu
 			apt-get update
@@ -360,7 +360,7 @@ if [[ ! -e /etc/wireguard/wg0.conf ]]; then
 		if [[ "$os" == "alpine" ]]; then
 			# Alpine
 			apk update
-			apk add ca-certificates $cron awall #libqrencode
+			apk add ca-certificates $cron awall libqrencode
 			apk add wireguard-tools --no-install-recommends
 		elif [[ "$os" == "ubuntu" ]]; then
 			# Ubuntu
