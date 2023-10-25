@@ -303,10 +303,12 @@ if [[ ! -e /etc/wireguard/wg0.conf ]]; then
 	# Install WireGuard
 	# If not running inside a container, set up the WireGuard kernel module
 	if [[ ! "$is_container" -eq 0 ]]; then
-		if [[ ! "$os" == "alpine" ]]; then
+		if [[ "$os" == "alpine" ]]; then
+			# Alpine
 			apk update 
 			apk add ip6tables iptables
-			apk add -u wireguard-tools wireguard-virt $firewall #TODO: libqrencode. Seems like it desn't exist
+			apk add -u wireguard-tools wireguard-virt libqrencode $firewall
+			apk add -u wireguard-tools wireguard-lts libqrencode $firewall
 		elif [[ "$os" == "ubuntu" ]]; then
 			# Ubuntu
 			apt-get update
@@ -359,7 +361,7 @@ if [[ ! -e /etc/wireguard/wg0.conf ]]; then
 		if [[ "$os" == "alpine" ]]; then
 			# Ubuntu
 			apk update
-			apk add qrencode ca-certificates $cron $firewall
+			apk add libqrencode ca-certificates $cron $firewall
 			apk add wireguard-tools --no-install-recommends
 		elif [[ "$os" == "ubuntu" ]]; then
 			# Ubuntu
