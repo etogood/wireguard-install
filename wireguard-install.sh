@@ -285,7 +285,6 @@ if [[ ! -e /etc/wireguard/wg0.conf ]]; then
 	if [[ "$os" == "alpine" ]]; then
 		if ! rc-service -e awall && ! hash iptables 2>/dev/null; then
 			firewall="awall" 
-			# Good FW to use on Alpine
 			echo "awall, which is required to manage routing tables, will also be installed."
 		fi
 	elif ! systemctl is-active --quiet firewalld.service && ! hash iptables 2>/dev/null; then
@@ -308,7 +307,7 @@ if [[ ! -e /etc/wireguard/wg0.conf ]]; then
 			echo "http://dl-cdn.alpinelinux.org/alpine/v3.11/community" >> /etc/apk/repositories
 			apk update
 			apk add ip6tables iptables
-			apk add -u wireguard-tools libqrencode $firewall
+			apk add -u wireguard-tools libqrencode awall
 		elif [[ "$os" == "ubuntu" ]]; then
 			# Ubuntu
 			apt-get update
