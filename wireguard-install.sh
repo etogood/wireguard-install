@@ -478,7 +478,7 @@ EOF
     "VPN": { "iface": "wg0" }
   },
   "policy": [
-    { "in": "internet", "action": "drop" },
+    { "in": "internet", "action": "accept" },
     { "in": "VPN", "out": "internet", "action": "accept" },
     { "out": "VPN", "in": "internet", "action": "accept" },
     { "action": "reject" }
