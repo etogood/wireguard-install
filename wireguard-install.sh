@@ -471,16 +471,16 @@ EOF
   "import": "custom-services",
   "variable": { "internet_if": "eth+"},
   "zone": {
-    "WAN": { "iface": "\$internet_if" },
-    "VPN": { "iface": "wg0" }
+    "internet": { "iface": "\$internet_if" },
+    "vpn": { "iface": "wg0" }
   },
   "policy": [
-    { "in": "WAN", "action": "accept" },
-    { "in": "VPN", "out": "WAN", "action": "accept" },
-    { "out": "VPN", "in": "WAN", "action": "accept" },
+    { "in": "internet", "action": "drop" },
+    { "in": "vpn", "out": "internet", "action": "accept" },
+    { "out": "vpn", "in": "internet", "action": "accept" },
     { "action": "reject" }
   ],
-  "snat": [ { "out": "WAN", "src": "$ip" } ]
+  "snat": [ { "out": "internet", "src": "10.7.0.0/24" } ]
 }
 EOF
 
@@ -489,7 +489,7 @@ EOF
     "description": "Allow incoming WireGuard UDP port $port",
     "filter": [
         {
-            "in": "WAN",
+            "in": "internet",
             "out": "_fw",
             "service": "wireguard",
             "action": "accept"
@@ -498,6 +498,20 @@ EOF
 }
 EOF
 
+		cat << EOF > /etc/awall/optional/vpntraffic.json
+{
+    "description": "Allow VPN traffic for selected ports",
+    "filter": [
+        {
+            "in": "vpn",
+            "out": "_fw",
+            "service": [ "ssh", "dns", "squid", "ping" ],
+            "action": "accept",
+	    "src": "10.7.0.0/24"
+        }
+    ]
+}
+EOF
 		cat << EOF > /etc/network/interfaces
 # WireGuard interface with private IP #
 auto wg0
@@ -518,16 +532,21 @@ EOF
 	ip route add 10.7.0.0/24 dev wg0
 	ifconfig wg0 up
 
-	awall list
-	awall enable cloud-server
 	awall enable wireguard
+	awall enable vpntraffic
 	awall activate
+	awall list
+	
 	## VERIFY that port opened ##
 	iptables -S | grep "$port"
 	ip6tables -S | grep "$port"
 	sed -i "s/\(IPFORWARD *= *\).*/\1\"yes\"/" /etc/conf.d/iptables
 	rc-service iptables restart
 	rc-service ip6tables restart
+
+	if [[ $(sysctl net.ipv4.ip_forward) == "net.ipv4.ip_forward = 1" ]]; then
+		echo "Alpine Linux is now acting as a router"
+	fi
 
 	elif systemctl is-active --quiet firewalld.service; then
 		# Using both permanent and not permanent rules to avoid a firewalld
