@@ -475,12 +475,12 @@ EOF
     "VPN": { "iface": "wg0" }
   },
   "policy": [
-    { "in": "WAN", "action": "drop" },
+    { "in": "WAN", "action": "accept" },
     { "in": "VPN", "out": "WAN", "action": "accept" },
     { "out": "VPN", "in": "WAN", "action": "accept" },
     { "action": "reject" }
   ],
-  "snat": [ { "out": "internet", "src": "10.7.0.0/24" } ]
+  "snat": [ { "out": "internet", "src": "$ip" } ]
 }
 EOF
 
@@ -495,35 +495,6 @@ EOF
             "action": "accept"
         }
     ]
-}
-EOF
-
-		cat << EOF > /etc/awall/optional/vpntraffic.json
-{
-    "description": "Allow VPN traffic for selected ports",
-    "filter": [
-        {
-            "in": "VPN",
-            "out": "_fw",
-            "service": [ "squid", "ping", "WAN" ],
-            "action": "accept",
-	    "src": "10.7.0.0/24"
-        }
-    ]
-}
-EOF
-		cat << EOF > /etc/awall/optional/traffic.json
-{
-  "description": "Allow outbound dns, http/https, ssh, ntp, ssh and ping",
-
-  "filter": [
-    {
-      "in": "_fw",
-      "out": "WAN",
-      "service": ["dns", "http", "https", "ssh", "ntp", "ping"],
-      "action": "accept"
-    }
-  ]
 }
 EOF
 
