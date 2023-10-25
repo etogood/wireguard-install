@@ -512,16 +512,6 @@ EOF
     ]
 }
 EOF
-	awall list
-	awall enable wireguard
-	awall enable vpntraffic
-	awall activate
-	## VERIFY that port opened ##
-	iptables -S | grep "$port"
-	ip6tables -S | grep "$port"
-	sed -i "s/\(IPFORWARD *= *\).*/\1\"yes\"/" /etc/conf.d/iptables
-	rc-service iptables restart
-	rc-service ip6tables restart
 
 	cat << EOF > /etc/network/interfaces
 # WireGuard interface with private IP #
@@ -543,6 +533,16 @@ EOF
 	ip route add 10.7.0.0/24 dev wg0
 	ifconfig wg0 up
 
+	awall list
+	awall enable wireguard
+	awall enable vpntraffic
+	awall activate
+	## VERIFY that port opened ##
+	iptables -S | grep "$port"
+	ip6tables -S | grep "$port"
+	sed -i "s/\(IPFORWARD *= *\).*/\1\"yes\"/" /etc/conf.d/iptables
+	rc-service iptables restart
+	rc-service ip6tables restart
 
 	elif systemctl is-active --quiet firewalld.service; then
 		# Using both permanent and not permanent rules to avoid a firewalld
