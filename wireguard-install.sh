@@ -305,7 +305,7 @@ if [[ ! -e /etc/wireguard/wg0.conf ]]; then
 		if [[ "$os" == "alpine" ]]; then
 			# Alpine
 			echo "ADDING NEW REPOS in /etc/apk/repositories"
-			{
+			{z
 				echo "http://dl-cdn.alpinelinux.org/alpine/v3.11/community" 
 				echo "http://dl-cdn.alpinelinux.org/alpine/v3.18/community" 
 				echo "https://dl-cdn.alpinelinux.org/alpine/edge/community/" 
