@@ -305,7 +305,7 @@ if [[ ! -e /etc/wireguard/wg0.conf ]]; then
 		if [[ "$os" == "alpine" ]]; then
 			# Alpine
 			echo "ADDING NEW REPOS in /etc/apk/repositories"
-			{z
+			{
 				echo "http://dl-cdn.alpinelinux.org/alpine/v3.11/community" 
 				echo "http://dl-cdn.alpinelinux.org/alpine/v3.18/community" 
 				echo "https://dl-cdn.alpinelinux.org/alpine/edge/community/" 
@@ -540,6 +540,12 @@ EOF
 }
 EOF
 	
+		awall enable cloud-server
+		awall enable wireguard
+		awall enable vpntraffic
+		awall activate
+		awall list
+
 		## VERIFY that port opened ##
 		iptables -S | grep "$port"
 		ip6tables -S | grep "$port"
@@ -550,12 +556,6 @@ EOF
 		if [[ $(sysctl net.ipv4.ip_forward) == "net.ipv4.ip_forward = 1" ]]; then
 			echo "Alpine Linux is now acting as a router"
 		fi
-
-		awall enable cloud-server
-		awall enable wireguard
-		awall enable vpntraffic
-		awall activate
-		awall list
 
 	elif systemctl is-active --quiet firewalld.service; then
 		# Using both permanent and not permanent rules to avoid a firewalld
@@ -754,9 +754,8 @@ else
 			if [[ "$remove" =~ ^[yY]$ ]]; then
 				port=$(grep '^ListenPort' /etc/wireguard/wg0.conf | cut -d " " -f 3)
 				if [[ "$os" == "alpine" ]]; then
-					if rc-service -e awall; then
-						echo "awall things"
-					fi
+					rc-service iptables stop
+					rc-service ip6tables stop
 				elif systemctl is-active --quiet firewalld.service; then
 					ip=$(firewall-cmd --direct --get-rules ipv4 nat POSTROUTING | grep '\-s 10.7.0.0/24 '"'"'!'"'"' -d 10.7.0.0/24' | grep -oE '[^ ]+$')
 					# Using both permanent and not permanent rules to avoid a firewalld reload.
@@ -777,12 +776,18 @@ else
 					systemctl disable --now wg-iptables.service
 					rm -f /etc/systemd/system/wg-iptables.service
 				fi
-				systemctl disable --now wg-quick@wg0.service
+				if [[ ! "$os" == "alpine" ]]; then
+					systemctl disable --now wg-quick@wg0.service
+				fi
 				rm -f /etc/systemd/system/wg-quick@wg0.service.d/boringtun.conf
 				rm -f /etc/sysctl.d/99-wireguard-forward.conf
 				# Different packages were installed if the system was containerized or not
 				if [[ ! "$is_container" -eq 0 ]]; then
-					if [[ "$os" == "ubuntu" ]]; then
+					if [[ "$os" == "alpine" ]]; then
+						# Alpine
+						rm -rf /etc/wireguard/
+						apk del --purge -y wireguard-tools
+					elif [[ "$os" == "ubuntu" ]]; then
 						# Ubuntu
 						rm -rf /etc/wireguard/
 						apt-get remove --purge -y wireguard wireguard-tools
@@ -813,7 +818,11 @@ else
 					fi
 				else
 					{ crontab -l 2>/dev/null | grep -v '/usr/local/sbin/boringtun-upgrade' ; } | crontab -
-					if [[ "$os" == "ubuntu" ]]; then
+					if [[ "$os" == "alpine" ]]; then
+						# Alpine
+						rm -rf /etc/wireguard/
+						apk del --purge -y wireguard-tools
+					elif [[ "$os" == "ubuntu" ]]; then
 						# Ubuntu
 						rm -rf /etc/wireguard/
 						apt-get remove --purge -y wireguard-tools
