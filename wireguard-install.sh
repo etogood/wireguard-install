@@ -304,10 +304,7 @@ if [[ ! -e /etc/wireguard/wg0.conf ]]; then
 	if [[ ! "$is_container" -eq 0 ]]; then
 		if [[ "$os" == "alpine" ]]; then
 			# Alpine
-			echo "ADDING NEW REPOS in /etc/apk/repositories"
-			{
-				echo "http://dl-cdn.alpinelinux.org/alpine/v3.18/community"
-			} >> /etc/apk/repositories
+			echo "FEW PACKS REQUIRE COMMUNITY REPO"
 			apk update
 			apk add -u ip6tables iptables
 			apk add -u wireguard-tools awall libqrencode
@@ -420,13 +417,11 @@ Environment=WG_SUDO=1" > /etc/systemd/system/wg-quick@wg0.service.d/boringtun.co
 		systemctl enable --now firewalld.service
 	fi
 	# If awall was just installed, enable it
-	echo "FW = $firewall"
 
 	if [[ "$firewall" == "awall" ]]; then
-	echo "AWALL IN _____________________________________________________"
-		modprobe -v ip_tables # IPv4
-		modprobe -v ip6_tables # if IPv6 is used
-		modprobe -v iptable_nat # if NAT is used aka router
+		modprobe -vq ip_tables # IPv4
+		modprobe -vq ip6_tables # if IPv6 is used
+		modprobe -vq iptable_nat # if NAT is used aka router
 
 		rc-update add iptables
 		rc-update add ip6tables
@@ -719,7 +714,7 @@ EOF
 	echo
 	# If the kernel module didn't load, system probably had an outdated kernel
 	# We'll try to help, but will not force a kernel upgrade upon the user
-	if [[ ! "$is_container" -eq 0 ]] && ! modprobe -nq wireguard; then
+	if [[ ! "$is_container" -eq 0 ]] && ! modprobe -vq wireguard; then
 		echo "Warning!"
 		echo "Installation was finished, but the WireGuard kernel module could not load."
 		if [[ "$os" == "ubuntu" && "$os_version" -eq 1804 ]]; then
