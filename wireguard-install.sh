@@ -272,7 +272,7 @@ if [[ ! -e /etc/wireguard/wg0.conf ]]; then
 		done
 		[[ -z "$boringtun_updates" ]] && boringtun_updates="y"
 		if [[ "$boringtun_updates" =~ ^[yY]$ ]]; then
-			if [[ "$os" == "centos" || "$os" == "fedora" ]]; then
+			if [[ "$os" == "centos" || "$os" == "fedora" || "$os" == "alpine" ]]; then
 				cron="cronie"
 			elif [[ "$os" == "alpine" || "$os" == "debian" || "$os" == "ubuntu" ]]; then
 				cron="cron"
@@ -453,17 +453,17 @@ EOF
 
 	# Enable and start WireGuard service
 
-		cat << EOF > /etc/network/interfaces
-	# WireGuard interface with private IP #
-	auto wg0
-	iface wg0 inet static
-		address 10.7.0.0
-		netmask 255.255.255.0
-		pre-up ip link add dev wg0 type wireguard
-		pre-up wg setconf wg0 /etc/wireguard/wg0.conf
-		post-up ip route add 10.7.0.0/24 dev wg0
-		post-down ip link delete wg0	
-EOF
+# 		cat << EOF > /etc/network/interfaces
+# 	# WireGuard interface with private IP #
+# 	auto wg0
+# 	iface wg0 inet static
+# 		address 10.7.0.0
+# 		netmask 255.255.255.0
+# 		pre-up ip link add dev wg0 type wireguard
+# 		pre-up wg setconf wg0 /etc/wireguard/wg0.conf
+# 		post-up ip route add 10.7.0.0/24 dev wg0
+# 		post-down ip link delete wg0	
+# EOF
 
 		ip link add dev wg0 type wireguard
 		wg setconf wg0 /etc/wireguard/wg0.conf
