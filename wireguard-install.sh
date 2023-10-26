@@ -283,7 +283,7 @@ if [[ ! -e /etc/wireguard/wg0.conf ]]; then
 	echo "WireGuard installation is ready to begin."
 	# Install a firewall if firewalld or iptables are not already available
 	if [[ "$os" == "alpine" ]]; then
-		if ! rc-service -e awall; then
+		if ! rc-service awall; then
 			firewall="awall" 
 			echo "awall, which is required to manage routing tables, will also be installed."
 		fi
