@@ -571,7 +571,7 @@ EOF
             "out": "_fw",
             "service": [ "ssh", "dns", "squid", "ping" ],
             "action": "accept",
-	    "src": "10.7.0.0/24"
+	    "src": "10.7.0.1/24"
         }
     ]
 }
