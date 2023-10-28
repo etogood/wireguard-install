@@ -450,6 +450,8 @@ EOF
 		echo 1 > /proc/sys/net/ipv6/conf/all/forwarding
 	fi
 	if [[ "$os" == "alpine" ]]; then
+	wg-quick up wg0
+
 		cat << EOF > /etc/awall/private/custom-services.json
 {
     "service": {
