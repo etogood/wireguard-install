@@ -454,14 +454,6 @@ EOF
 	if [[ "$os" == "alpine" ]]; then
 	wg-quick up wg0
 
-	apk add squashfs-tools # install squashfs tools to unpack modloop
-	unsquashfs -d /root/squash /lib/modloop-lts # unpack modloop to root dir
-	umount /.modloop # unmount existing modloop
-	mount /root/squash/ /.modloop/ # mount unpacked modloop
-	apk del wireguard-lts # uninstall previous WireGuard install
-	apk add wireguard-lts
-	apk add wireguard-tools
-
 		cat << EOF > /etc/awall/private/custom-services.json
 {
     "service": {
