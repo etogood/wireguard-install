@@ -307,7 +307,7 @@ if [[ ! -e /etc/wireguard/wg0.conf ]]; then
 			echo "FEW PACKS REQUIRE COMMUNITY REPO"
 			apk update
 			apk add -u ip6tables iptables
-			apk add -u wireguard-tools awall libqrencode
+			apk add -u wireguard-tools awall libqrencode wireguard-tools-wg-quick
 		elif [[ "$os" == "ubuntu" ]]; then
 			# Ubuntu
 
@@ -361,7 +361,7 @@ if [[ ! -e /etc/wireguard/wg0.conf ]]; then
 		if [[ "$os" == "alpine" ]]; then
 			# Alpine
 			apk update
-			apk add ca-certificates $cron awall libqrencode
+			apk add ca-certificates $cron awall libqrencode wireguard-tools-wg-quick
 			apk add wireguard-tools --no-install-recommends
 		elif [[ "$os" == "ubuntu" ]]; then
 			# Ubuntu
@@ -450,29 +450,6 @@ EOF
 		echo 1 > /proc/sys/net/ipv6/conf/all/forwarding
 	fi
 	if [[ "$os" == "alpine" ]]; then
-
-	# Enable and start WireGuard service
-
-# 		cat << EOF > /etc/network/interfaces
-# 	# WireGuard interface with private IP #
-# 	auto wg0
-# 	iface wg0 inet static
-# 		address 10.7.0.0
-# 		netmask 255.255.255.0
-# 		pre-up ip link add dev wg0 type wireguard
-# 		pre-up wg setconf wg0 /etc/wireguard/wg0.conf
-# 		post-up ip route add 10.7.0.0/24 dev wg0
-# 		post-down ip link delete wg0	
-# EOF
-
-		ip link add dev wg0 type wireguard
-		wg setconf wg0 /etc/wireguard/wg0.conf
-		ifconfig wg0 10.7.0.0 netmask 255.255.255.0
-		## [ FLUSH it to avoid RTNETLINK error for existing routing table ] ##
-		ip addr flush dev wg0
-		ip route add 10.7.0.0/24 dev wg0
-		ifconfig wg0 up
-
 		cat << EOF > /etc/awall/private/custom-services.json
 {
     "service": {
