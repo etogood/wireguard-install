@@ -454,149 +454,149 @@ EOF
 	if [[ "$os" == "alpine" ]]; then
 	wg-quick up wg0
 
-# 		cat << EOF > /etc/awall/private/custom-services.json
-# {
-#     "service": {
-#         "wireguard": [
-#             { "proto": "udp", "port": $port }
-#         ],
-#         "squid": [
-#             { "proto": "tcp", "port": 3128 }
-#         ]
-#     }
-# }
-# EOF
+		cat << EOF > /etc/awall/private/custom-services.json
+{
+    "service": {
+        "wireguard": [
+            { "proto": "udp", "port": $port }
+        ],
+        "squid": [
+            { "proto": "tcp", "port": 3128 }
+        ]
+    }
+}
+EOF
 
-# 		cat << EOF > /etc/awall/optional/cloud-server.json
-# {
-#   "description": "Default awall policy to protect Cloud server",
-#   "import": "custom-services",
-#   "variable": { "internet_if": "eth+"},
-#   "zone": {
-#     "internet": { "iface": "\$internet_if" },
-#     "vpn": { "iface": "wg0" }
-#   },
-#   "policy": [
-#     { "in": "internet", "action": "drop" },
-#     { "in": "vpn", "out": "internet", "action": "accept" },
-#     { "out": "vpn", "in": "internet", "action": "accept" },
-#     { "action": "reject" }
-#   ],
-#   "snat": [ { "out": "internet", "src": "10.7.0.0/24" } ]
-# }
-# EOF
+		cat << EOF > /etc/awall/optional/cloud-server.json
+{
+  "description": "Default awall policy to protect Cloud server",
+  "import": "custom-services",
+  "variable": { "internet_if": "eth+"},
+  "zone": {
+    "internet": { "iface": "\$internet_if" },
+    "vpn": { "iface": "wg0" }
+  },
+  "policy": [
+    { "in": "internet", "action": "drop" },
+    { "in": "vpn", "out": "internet", "action": "accept" },
+    { "out": "vpn", "in": "internet", "action": "accept" },
+    { "action": "reject" }
+  ],
+  "snat": [ { "out": "internet", "src": "10.7.0.0/24" } ]
+}
+EOF
 
-# 		cat << EOF > /etc/awall/optional/ssh.json
-# {
-#     "description": "Allow incoming SSH access (TCP/22)",
+		cat << EOF > /etc/awall/optional/ssh.json
+{
+    "description": "Allow incoming SSH access (TCP/22)",
 
-#     "filter": [
-#         {
-#             "in": "internet",
-#             "out": "_fw",
-#             "service": "ssh",
-#             "action": "accept",
-#             "src": "0.0.0.0/0",
-#             "conn-limit": { "count": 3, "interval": 60 }
-#         }
-#     ]
-# }
-# EOF
+    "filter": [
+        {
+            "in": "internet",
+            "out": "_fw",
+            "service": "ssh",
+            "action": "accept",
+            "src": "0.0.0.0/0",
+            "conn-limit": { "count": 3, "interval": 60 }
+        }
+    ]
+}
+EOF
 
-# 		cat << EOF > /etc/awall/optional/ping.json
-# {
+		cat << EOF > /etc/awall/optional/ping.json
+{
 
-#     "description": "Allow ping-pong",
+    "description": "Allow ping-pong",
 
-#     "filter": [
-#         {
-#               "in": "internet",
-#               "service": "ping",
-#               "action": "accept",
-#               "flow-limit": { "count": 10, "interval": 6 }
-#         }
-#     ]
-# }
-# EOF
+    "filter": [
+        {
+              "in": "internet",
+              "service": "ping",
+              "action": "accept",
+              "flow-limit": { "count": 10, "interval": 6 }
+        }
+    ]
+}
+EOF
 
-# 		cat << EOF > /etc/awall/optional/webserver.json
-# {
-#     "description": "Allow incoming Apache (TCP 80 & 443) ports",
-#     "filter": [
-#         {
-#             "in": "internet",
-#             "out": "_fw",
-#             "service": [ "http", "https"],
-#             "action": "accept"
-#         }
-#     ]
-# }
-# EOF
+		cat << EOF > /etc/awall/optional/webserver.json
+{
+    "description": "Allow incoming Apache (TCP 80 & 443) ports",
+    "filter": [
+        {
+            "in": "internet",
+            "out": "_fw",
+            "service": [ "http", "https"],
+            "action": "accept"
+        }
+    ]
+}
+EOF
 
-# 		cat << EOF > /etc/awall/optional/outgoing.json
-# {
-#     "description": "Allow outgoing connections for http/https, dns, ssh, ntp, ssh and ping",
+		cat << EOF > /etc/awall/optional/outgoing.json
+{
+    "description": "Allow outgoing connections for http/https, dns, ssh, ntp, ssh and ping",
 
-#     "filter": [
-#         {
-#             "in": "_fw",
-#             "out": "internet",
-#             "service": [ "http", "https", "dns", "ssh", "ntp", "ping" ],
-#             "action": "accept"
-#         }
-#     ]
-# }
-# EOF
+    "filter": [
+        {
+            "in": "_fw",
+            "out": "internet",
+            "service": [ "http", "https", "dns", "ssh", "ntp", "ping" ],
+            "action": "accept"
+        }
+    ]
+}
+EOF
 
-# 		cat << EOF > /etc/awall/optional/wireguard.json
-# {
-#     "description": "Allow incoming WireGuard UDP port $port",
-#     "filter": [
-#         {
-#             "in": "internet",
-#             "out": "_fw",
-#             "service": "wireguard",
-#             "action": "accept"
-#         }
-#     ]
-# }
-# EOF
+		cat << EOF > /etc/awall/optional/wireguard.json
+{
+    "description": "Allow incoming WireGuard UDP port $port",
+    "filter": [
+        {
+            "in": "internet",
+            "out": "_fw",
+            "service": "wireguard",
+            "action": "accept"
+        }
+    ]
+}
+EOF
 
-# 		cat << EOF > /etc/awall/optional/vpntraffic.json
-# {
-#     "description": "Allow VPN traffic for selected ports",
-#     "filter": [
-#         {
-#             "in": "vpn",
-#             "out": "_fw",
-#             "service": [ "ssh", "dns", "squid", "ping" ],
-#             "action": "accept",
-# 	    "src": "10.7.0.0/24"
-#         }
-#     ]
-# }
-# EOF
+		cat << EOF > /etc/awall/optional/vpntraffic.json
+{
+    "description": "Allow VPN traffic for selected ports",
+    "filter": [
+        {
+            "in": "vpn",
+            "out": "_fw",
+            "service": [ "ssh", "dns", "squid", "ping" ],
+            "action": "accept",
+	    "src": "10.7.0.0/24"
+        }
+    ]
+}
+EOF
 	
-# 		awall enable cloud-server
-# 		awall enable ssh
-# 		awall enable ping
-# 		awall enable webserver
-# 		awall enable outgoing
-# 		awall enable wireguard
-# 		awall enable vpntraffic
-# 		awall activate
-# 		awall list
+		awall enable cloud-server
+		awall enable ssh
+		awall enable ping
+		awall enable webserver
+		awall enable outgoing
+		awall enable wireguard
+		awall enable vpntraffic
+		awall activate
+		awall list
 
-# 		## VERIFY that port opened ##
-# 		iptables -S | grep "$port"
-# 		ip6tables -S | grep "$port"
-# 		sed -i "s/\(IPFORWARD *= *\).*/\1\"yes\"/" /etc/conf.d/iptables
-# 		rc-service iptables restart
-# 		rc-service ip6tables restart
+		## VERIFY that port opened ##
+		iptables -S | grep "$port"
+		ip6tables -S | grep "$port"
+		sed -i "s/\(IPFORWARD *= *\).*/\1\"yes\"/" /etc/conf.d/iptables
+		rc-service iptables restart
+		rc-service ip6tables restart
 
-# 		if [[ $(sysctl net.ipv4.ip_forward) == "net.ipv4.ip_forward = 1" ]]; then
-# 			echo "Alpine Linux is now acting as a router"
-# 		fi
+		if [[ $(sysctl net.ipv4.ip_forward) == "net.ipv4.ip_forward = 1" ]]; then
+			echo "Alpine Linux is now acting as a router"
+		fi
 # Create a service to set up persistent iptables rules
 		iptables_path=$(command -v iptables)
 		ip6tables_path=$(command -v ip6tables)
